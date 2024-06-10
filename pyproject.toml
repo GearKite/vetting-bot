@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "vetting-bot"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+license = "AGPL-3.0-or-later"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+matrix-nio = {extras = ["e2e"], version = "^0.24.0"}
+peewee = "^3.17.5"
+coloredlogs = "^15.0.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+isort = "^5.13.2"
+pylint = "^3.2.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
