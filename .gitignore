@@ -5,6 +5,7 @@
 env/
 env3/
 .env/
+.venv
 
 # Bot local files
 *.db
@@ -24,3 +25,6 @@ config.yaml
 
 # Log files
 *.log
+
+# dev environment
+.history
