@@ -58,9 +58,9 @@ RUN apk add --no-cache \
 # Install python runtime modules. We do this before copying the source code
 # such that these dependencies can be cached
 # This speeds up subsequent image builds when the source code is changed
-RUN mkdir -p /src/my_project_name
-COPY my_project_name/__init__.py /src/my_project_name/
-COPY README.md my-project-name /src/
+RUN mkdir -p /src/vetting_bot
+COPY vetting_bot/__init__.py /src/vetting_bot/
+COPY README.md vetting-bot /src/
 
 # Build the dependencies
 COPY setup.py /src/setup.py
@@ -68,7 +68,7 @@ RUN pip install --prefix="/python-libs" --no-warn-script-location "/src/.[postgr
 
 # Now copy the source code
 COPY *.py *.md /src/
-COPY my_project_name/*.py /src/my_project_name/
+COPY vetting_bot/*.py /src/vetting_bot/
 
 # And build the final module
 RUN pip install --prefix="/python-libs" --no-warn-script-location "/src/.[postgres]"
@@ -98,4 +98,4 @@ RUN apk add --no-cache \
 VOLUME ["/data"]
 
 # Start the bot
-ENTRYPOINT ["my-project-name", "/data/config.yaml"]
+ENTRYPOINT ["vetting-bot", "/data/config.yaml"]

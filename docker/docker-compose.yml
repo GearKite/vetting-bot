@@ -1,4 +1,4 @@
-version: '3.1' # specify docker-compose version
+version: "3.1" # specify docker-compose version
 
 volumes:
   # Set up with `docker volume create ...`. See docker/README.md for more info.
@@ -8,8 +8,8 @@ volumes:
 
 services:
   # Runs from the latest release
-  my-project-name:
-    image: somebody/my-project-name
+  vetting-bot:
+    image: somebody/vetting-bot
     restart: always
     volumes:
       - data_volume:/data
@@ -61,4 +61,4 @@ services:
     volumes:
       - pg_data_volume:/var/lib/postgresql/data
     environment:
-        POSTGRES_PASSWORD: somefancypassword
+      POSTGRES_PASSWORD: somefancypassword

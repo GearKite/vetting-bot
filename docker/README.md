@@ -1,6 +1,6 @@
 # Docker
 
-The docker image will run my-project-name with a SQLite database and
+The docker image will run vetting-bot with a SQLite database and
 end-to-end encryption dependencies included. For larger deployments, a
 connection to a Postgres database backend is recommended.
 
@@ -25,12 +25,12 @@ Copy `sample.config.yaml` to a file named `config.yaml` inside of your newly
 created `data` directory. Fill it out as you normally would, with a few minor
 differences:
 
-* The bot store directory should reside inside of the data directory so that it
+- The bot store directory should reside inside of the data directory so that it
   is not wiped on container restart. Change it from the default to
   `/data/store`. There is no need to create this directory yourself, it will be
   created on startup if it does not exist.
 
-* Choose whether you want to use SQLite or Postgres as your database backend.
+- Choose whether you want to use SQLite or Postgres as your database backend.
   Postgres has increased performance over SQLite, and is recommended for
   deployments with many users.
 
@@ -44,7 +44,7 @@ differences:
   If using postgres, point to your postgres instance instead:
 
   ```
-  database: "postgres://username:password@postgres/my-project-name?sslmode=disable"
+  database: "postgres://username:password@postgres/vetting-bot?sslmode=disable"
   ```
 
   **Note:** a postgres container is defined in `docker-compose.yaml` for your convenience.
@@ -80,20 +80,20 @@ docker-compose up -d postgres
 Start the bot with:
 
 ```
-docker-compose up my-project-name
+docker-compose up vetting-bot
 ```
 
 This will run the bot and log the output to the terminal. You can instead run
 the container detached with the `-d` flag:
 
 ```
-docker-compose up -d my-project-name
+docker-compose up -d vetting-bot
 ```
 
 (Logs can later be accessed with the `docker logs` command).
 
 This will use the `latest` tag from
-[Docker Hub](https://hub.docker.com/somebody/my-project-name).
+[Docker Hub](https://hub.docker.com/somebody/vetting-bot).
 
 If you would rather run from the checked out code, you can use:
 
@@ -116,7 +116,7 @@ remove the option altogether to allow all addresses.
 To update the container, navigate to the bot's `docker` directory and run:
 
 ```
-docker-compose pull my-project-name
+docker-compose pull vetting-bot
 ```
 
 Then restart the bot.
@@ -124,26 +124,26 @@ Then restart the bot.
 ## Systemd
 
 A systemd service file is provided for your convenience at
-[my-project-name.service](my-project-name.service). The service uses
+[vetting-bot.service](vetting-bot.service). The service uses
 `docker-compose` to start and stop the bot.
 
-Copy the file to `/etc/systemd/system/my-project-name.service` and edit to
+Copy the file to `/etc/systemd/system/vetting-bot.service` and edit to
 match your setup. You can then start the bot with:
 
 ```
-systemctl start my-project-name
+systemctl start vetting-bot
 ```
 
 and stop it with:
 
 ```
-systemctl stop my-project-name
+systemctl stop vetting-bot
 ```
 
 To run the bot on system startup:
 
 ```
-systemctl enable my-project-name
+systemctl enable vetting-bot
 ```
 
 ## Building the image
@@ -152,5 +152,5 @@ To build a production image from source, use the following `docker build` comman
 from the repo's root:
 
 ```
-docker build -t somebody/my-project-name:latest -f docker/Dockerfile .
+docker build -t somebody/vetting-bot:latest -f docker/Dockerfile .
 ```

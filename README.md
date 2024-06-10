@@ -9,30 +9,29 @@ This repo contains a working Matrix echo bot that can be easily extended to your
 
 Features include out-of-the-box support for:
 
-* Bot commands
-* SQLite3 and Postgres database backends
-* Configuration files
-* Multi-level logging
-* Docker
-* Participation in end-to-end encrypted rooms
+- Bot commands
+- SQLite3 and Postgres database backends
+- Configuration files
+- Multi-level logging
+- Docker
+- Participation in end-to-end encrypted rooms
 
 ## Projects using nio-template
 
-* [anoadragon453/matrix-reminder-bot](https://github.com/anoadragon453/matrix-reminder-bot
-) - A matrix bot to remind you about things
-* [gracchus163/hopeless](https://github.com/gracchus163/hopeless) - COREbot for the Hope2020 conference Matrix server
-* [alturiak/nio-smith](https://github.com/alturiak/nio-smith) - A modular bot for @matrix-org that can be dynamically
-extended by plugins
-* [anoadragon453/msc-chatbot](https://github.com/anoadragon453/msc-chatbot) - A matrix bot for matrix spec proposals
-* [anoadragon453/matrix-episode-bot](https://github.com/anoadragon453/matrix-episode-bot) - A matrix bot to post episode links
-* [TheForcer/vision-nio](https://github.com/TheForcer/vision-nio) - A general purpose matrix chatbot
-* [anoadragon453/drawing-challenge-bot](https://github.com/anoadragon453/drawing-challenge-bot) - A matrix bot to
-post historical, weekly art challenges from reddit to a room
-* [8go/matrix-eno-bot](https://github.com/8go/matrix-eno-bot) - A bot to be used as a) personal assistant or b) as 
-an admin tool to maintain your Matrix installation or server
-* [elokapina/bubo](https://github.com/elokapina/bubo) - Matrix bot to help with community management
-* [elokapina/middleman](https://github.com/elokapina/middleman) - Matrix bot to act as a middleman, for example as a support bot
-* [chc4/matrix-pinbot](https://github.com/chc4/matrix-pinbot) - Matrix bot for pinning messages to a dedicated channel
+- [anoadragon453/matrix-reminder-bot](https://github.com/anoadragon453/matrix-reminder-bot) - A matrix bot to remind you about things
+- [gracchus163/hopeless](https://github.com/gracchus163/hopeless) - COREbot for the Hope2020 conference Matrix server
+- [alturiak/nio-smith](https://github.com/alturiak/nio-smith) - A modular bot for @matrix-org that can be dynamically
+  extended by plugins
+- [anoadragon453/msc-chatbot](https://github.com/anoadragon453/msc-chatbot) - A matrix bot for matrix spec proposals
+- [anoadragon453/matrix-episode-bot](https://github.com/anoadragon453/matrix-episode-bot) - A matrix bot to post episode links
+- [TheForcer/vision-nio](https://github.com/TheForcer/vision-nio) - A general purpose matrix chatbot
+- [anoadragon453/drawing-challenge-bot](https://github.com/anoadragon453/drawing-challenge-bot) - A matrix bot to
+  post historical, weekly art challenges from reddit to a room
+- [8go/matrix-eno-bot](https://github.com/8go/matrix-eno-bot) - A bot to be used as a) personal assistant or b) as
+  an admin tool to maintain your Matrix installation or server
+- [elokapina/bubo](https://github.com/elokapina/bubo) - Matrix bot to help with community management
+- [elokapina/middleman](https://github.com/elokapina/middleman) - Matrix bot to act as a middleman, for example as a support bot
+- [chc4/matrix-pinbot](https://github.com/chc4/matrix-pinbot) - Matrix bot for pinning messages to a dedicated channel
 
 Want your project listed here? [Edit this
 page!](https://github.com/anoadragon453/nio-template/edit/master/README.md)
@@ -43,14 +42,14 @@ See [SETUP.md](SETUP.md) for how to setup and run the template project.
 
 ## Project structure
 
-*A reference of each file included in the template repository, its purpose and
-what it does.*
+_A reference of each file included in the template repository, its purpose and
+what it does._
 
-The majority of the code is kept inside of the `my_project_name` folder, which
+The majority of the code is kept inside of the `vetting_bot` folder, which
 is in itself a [python package](https://docs.python.org/3/tutorial/modules.html),
 the `__init__.py` file inside declaring it as such.
 
-To run the bot, the `my-project-name` script in the root of the codebase is
+To run the bot, the `vetting-bot` script in the root of the codebase is
 available. It will import the `main` function from the `main.py` file in the
 package and run it. To properly install this script into your python environment,
 run `pip install -e .` in the project's root directory.
@@ -65,7 +64,7 @@ their needs. Be sure never to check the edited `config.yaml` into source control
 since it'll likely contain sensitive details such as passwords!
 
 Below is a detailed description of each of the source code files contained within
-the `my_project_name` directory:
+the `vetting_bot` directory:
 
 ### `main.py`
 
@@ -80,7 +79,7 @@ asking constantly asking for new events. Each time they do, the client gets a
 sync token (stored in the `next_batch` field of the sync response). If the
 client provides this token the next time it syncs (using the `since` parameter
 on the `AsyncClient.sync` method), the homeserver will only return new event
-*since* those specified by the given token.
+_since_ those specified by the given token.
 
 This token is saved and provided again automatically by using the
 `client.sync_forever(...)` method.
