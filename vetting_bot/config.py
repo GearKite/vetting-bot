@@ -5,6 +5,7 @@ import sys
 from typing import Any, List, Optional
 
 import yaml
+import coloredlogs
 
 from vetting_bot.errors import ConfigError
 
@@ -56,7 +57,7 @@ class Config:
         if console_logging_enabled:
             handler = logging.StreamHandler(sys.stdout)
             handler.setFormatter(formatter)
-            logger.addHandler(handler)
+            coloredlogs.install(handler=handler)
 
         # Storage setup
         self.store_path = self._get_cfg(["storage", "store_path"], required=True)
