@@ -39,6 +39,10 @@ remove the option altogether to allow all addresses.
 If you would rather not or are unable to run docker, the following will
 instruct you on how to install the dependencies natively:
 
+#### Install Poetry
+
+[Python Poetry install guide](https://python-poetry.org/docs/#installation)
+
 #### Install libolm
 
 You can install [libolm](https://gitlab.matrix.org/matrix-org/olm) from source,
@@ -68,24 +72,8 @@ sudo pacman -S postgresql-libs
 
 #### Install Python dependencies
 
-Create and activate a Python 3 virtual environment:
-
 ```
-virtualenv -p python3 env
-source env/bin/activate
-```
-
-Install python dependencies:
-
-```
-pip install -e .
-```
-
-(Optional) If you want to use postgres as a database backend, use the following
-command to install postgres dependencies alongside those that are necessary:
-
-```
-pip install -e ".[postgres]"
+poetry install
 ```
 
 ## Configuration
@@ -126,25 +114,20 @@ Refer to the docker [run instructions](docker/README.md#running).
 Make sure to source your python environment if you haven't already:
 
 ```
-source env/bin/activate
+poetry shell
 ```
 
 Then simply run the bot with:
 
 ```
-my-project-name
+./vetting-bot
 ```
-
-You'll notice that "my-project-name" is scattered throughout the codebase. When
-it comes time to modifying the code for your own purposes, you are expected to
-replace every instance of "my-project-name" and its variances with your own
-project's name.
 
 By default, the bot will run with the config file at `./config.yaml`. However, an
 alternative relative or absolute filepath can be specified after the command:
 
 ```
-my-project-name other-config.yaml
+./vetting-bot other-config.yaml
 ```
 
 ## Testing the bot works
