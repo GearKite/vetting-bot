@@ -1,0 +1,28 @@
+# vetting-bot
+
+(VERY WIP) bot to automate the process of vetting and welcoming new members
+
+# Resources to understand/code the bot
+
+- poll syntax for matrix protocol: https://github.com/matrix-org/matrix-spec-proposals/blob/main/proposals/3381-polls.md
+- library for the bot: https://github.com/matrix-nio/matrix-nio
+
+# What it should do
+
+- Listen to commands on #vetting (quite easy)
+- Invite potential new members to vetting channels (maybe less easy.
+  Should there be a fixed number of channels?  Or should they be created
+  on demand?  Both could pose some problems)
+	- Maybe ask questions? (simple syntax for the potential member awaiting vetting to say they've finished a question, but otherwise
+	  quite trivial)
+	- Or send link to the cryptpad forms? (trivial, but needs cryptpad integration to send the form link/content to #vetting for voting)
+- When all questions have been asked, start a vote in #vetting, and start a 36h timer (trivial)
+- Synthesise matrix events responding to the poll (possibly non-trivial (see poll syntax)), and if there is no refusal, invite the new member
+- Send welcome messages
+
+# What I'm confused about
+
+- How to make e2e encryption work?
+- Should the bot interact with the user?
+- should the bot send pdfs? Or should it send formatted matrix messages?
+- should it rather send links, or rather send content?
