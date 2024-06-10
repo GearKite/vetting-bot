@@ -9,7 +9,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-matrix-nio = {extras = ["e2e"], version = "^0.24.0"}
+matrix-nio = { extras = ["e2e"], version = "^0.24.0" }
 peewee = "^3.17.5"
 coloredlogs = "^15.0.1"
 
@@ -21,3 +21,24 @@ pylint = "^3.2.3"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.flake8]
+# see https://pycodestyle.readthedocs.io/en/latest/intro.html#error-codes
+# for error codes. The ones we ignore are:
+#   W503: line break before binary operator
+#   W504: line break after binary operator
+#   E203: whitespace before ':' (which is contrary to pep8?)
+#   E731: do not assign a lambda expression, use a def
+#   E501: Line too long (black enforces this for us)
+ignore = "W503,W504,E203,E731,E501"
+
+[tool.isort]
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,TESTS,LOCALFOLDER"
+default_section = "THIRDPARTY"
+known_first_party = "vetting-bot"
+known_tests = "tests"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+combine_as_imports = true
+profile = "black"
