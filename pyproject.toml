@@ -12,6 +12,8 @@ python = "^3.11"
 matrix-nio = { extras = ["e2e"], version = "^0.24.0" }
 peewee = "^3.17.5"
 coloredlogs = "^15.0.1"
+psycopg2 = "^2.8.5"
+markdown = "^3.1.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
