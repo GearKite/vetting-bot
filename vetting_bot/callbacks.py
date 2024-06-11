@@ -12,7 +12,7 @@ from nio import (
 )
 
 from vetting_bot.bot_commands import Command
-from vetting_bot.chat_functions import make_pill, react_to_event, send_text_to_room
+from vetting_bot.chat_functions import make_pill, send_text_to_room
 from vetting_bot.config import Config
 from vetting_bot.message_responses import Message
 from vetting_bot.storage import Storage
