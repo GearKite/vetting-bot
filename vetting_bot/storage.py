@@ -112,7 +112,8 @@ class Storage:
                     vetting_create_time INT(12),
                     voting_start_time INT(12),
                     poll_event_id VARCHAR(255),
-                    vote_ended BOOLEAN NOT NULL DEFAULT FALSE
+                    vote_ended BOOLEAN NOT NULL DEFAULT FALSE,
+                    decision_event_id VARCHAR(255)
                 )
                 """
             )

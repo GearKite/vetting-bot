@@ -175,7 +175,10 @@ class Timer:
             )
 
         # Finally - update database
-        # self.store.cursor.execute(
-        #    "UPDATE vetting SET vote_ended = 1 WHERE mxid = ?",
-        #    (mxid,),
-        # )
+        self.store.cursor.execute(
+            "UPDATE vetting SET vote_ended = 1, decision_event_id = ? WHERE mxid = ?",
+            (
+                decision_resp.event_id,
+                mxid,
+            ),
+        )

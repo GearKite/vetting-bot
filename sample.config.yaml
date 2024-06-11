@@ -34,11 +34,13 @@ storage:
 
 # Vetting options
 vetting:
+  # The main space, where new recruits will be invited to
+  main_space_id: "!xxx:xxx"
   # Internal room id for the main vetting room
   # Commands will be run here
-  room_id: "!xxx:xxx"
-  # A space which will house all the vetting rooms
-  space_id: "!xxx:xxx"
+  vetting_room_id: "!xxx:xxx"
+  # A sub-space which will house all the vetting rooms
+  vetting_space_id: "!xxx:xxx"
   # Voting time in seconds
   voting_time: 172800
   # Requirements for getting accepted

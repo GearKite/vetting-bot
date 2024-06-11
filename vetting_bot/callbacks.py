@@ -6,6 +6,7 @@ from nio import (
     JoinError,
     MatrixRoom,
     MegolmEvent,
+    ReactionEvent,
     RoomGetEventError,
     RoomMessageText,
     UnknownEvent,
@@ -187,25 +188,41 @@ class Callbacks:
         #    red_x_and_lock_emoji,
         # )
 
+    async def reaction(self, room: MatrixRoom, event: ReactionEvent):
+        """Callback when a reaction event is received.
+
+        Args:
+            room (MatrixRoom): The room the reaction was sent in.
+            event (ReactionEvent): The event itself.
+        """
+
+        # Ignore own events
+        if event.sender == self.client.user_id:
+            return
+
+        if room.room_id == self.config.vetting_room_id:
+            if event.key == "confirm":
+                # Check which user the reaction is for (if any)
+                self.store.cursor.execute(
+                    "SELECT mxid FROM vetting WHERE decision_event_id = ?",
+                    (event.reacts_to,),
+                )
+                row = self.store.cursor.fetchone()
+                if row is None:
+                    return
+
+                # Invite the user
+                logger.info("Inviting new user (%s) to the Federation.", row[0])
+                await self.client.room_invite(self.config.main_space_id, row[0])
+
     async def unknown(self, room: MatrixRoom, event: UnknownEvent) -> None:
         """Callback for when an event with a type that is unknown to matrix-nio is received.
-        Currently this is used for reaction events, which are not yet part of a released
-        matrix spec (and are thus unknown to nio).
 
         Args:
             room: The room the reaction was sent in.
 
             event: The event itself.
         """
-        if event.type == "m.reaction":
-            # Get the ID of the event this was a reaction to
-            relation_dict = event.source.get("content", {}).get("m.relates_to", {})
-
-            reacted_to = relation_dict.get("event_id")
-            if reacted_to and relation_dict.get("rel_type") == "m.annotation":
-                await self._reaction(room, event, reacted_to)
-                return
-
         logger.debug(
             f"Got unknown event with type to {event.type} from {event.sender} in {room.room_id}."
         )

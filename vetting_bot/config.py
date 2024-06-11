@@ -107,13 +107,23 @@ class Config:
         self.command_prefix = self._get_cfg(["command_prefix"], default="!c") + " "
 
         # Vetting setup
-        self.vetting_room_id = self._get_cfg(["vetting", "room_id"], required=True)
-        if not re.match("!.*:.*", self.vetting_room_id):
-            raise ConfigError("vetting.room_id must be in the form !xxx:domain")
+        self.main_space_id = self._get_cfg(["vetting", "main_space_id"], required=True)
+        if not re.match("!.*:.*", self.main_space_id):
+            raise ConfigError("vetting.main_space_id must be in the form !xxx:domain")
 
-        self.vetting_space_id = self._get_cfg(["vetting", "space_id"], required=True)
+        self.vetting_room_id = self._get_cfg(
+            ["vetting", "vetting_room_id"], required=True
+        )
+        if not re.match("!.*:.*", self.vetting_room_id):
+            raise ConfigError("vetting.vetting_room_id must be in the form !xxx:domain")
+
+        self.vetting_space_id = self._get_cfg(
+            ["vetting", "vetting_space_id"], required=True
+        )
         if not re.match("!.*:.*", self.vetting_space_id):
-            raise ConfigError("vetting.space_id must be in the form !xxx:domain")
+            raise ConfigError(
+                "vetting.vetting_space_id must be in the form !xxx:domain"
+            )
 
         self.voting_time = int(self._get_cfg(["vetting", "voting_time"], required=True))
 
