@@ -1,6 +1,7 @@
 import logging
 import random
 import re
+import time
 
 from nio import (
     AsyncClient,
@@ -12,7 +13,7 @@ from nio import (
 
 from vetting_bot.chat_functions import react_to_event, send_text_to_room
 from vetting_bot.config import Config
-from vetting_bot.storage import Storage
+from vetting_bot.storage import Storage, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,16 @@ class Command:
             await send_text_to_room(self.client, self.room.room_id, text)
             return
 
+        # Check if vetting room already exists for user
+        self.store.cursor.execute(
+            "SELECT room_id FROM vetting WHERE mxid=?", (vetted_user_id,)
+        )
+        row = self.store.cursor.fetchone()
+        if row is not None:
+            text = f"A vetting room already exists for this user: `{row[0]}`"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+
         # Get members to invite
         invitees = [member_id for member_id in self.room.users.keys()]
         invitees.append(vetted_user_id)
@@ -144,7 +155,11 @@ class Command:
             logging.error(room_resp, stack_info=True)
             return
 
-        self.store.conn
+        # Create new vetting entry
+        self.store.cursor.execute(
+            "INSERT INTO vetting (mxid, room_id, vetting_create_time) VALUES (?, ?, ?)",
+            (vetted_user_id, room_resp.room_id, time.time()),
+        )
 
         # Add newly created room to space
         space_child_content = {

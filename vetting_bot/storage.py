@@ -1,5 +1,8 @@
 import logging
+import sqlite3
 from typing import Any, Dict
+
+import psycopg2
 
 # The latest migration version of the database.
 #
@@ -8,7 +11,7 @@ from typing import Any, Dict
 # the version specified here.
 #
 # When a migration is performed, the `migration_version` table should be incremented.
-latest_migration_version = 0
+latest_migration_version = 1
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +54,9 @@ class Storage:
     ) -> Any:
         """Creates and returns a connection to the database"""
         if database_type == "sqlite":
-            import sqlite3
-
             # Initialize a connection to the database, with autocommit on
             return sqlite3.connect(connection_string, isolation_level=None)
         elif database_type == "postgres":
-            import psycopg2
-
             conn = psycopg2.connect(connection_string)
 
             # Autocommit on
@@ -102,15 +101,25 @@ class Storage:
         """
         logger.debug("Checking for necessary database migrations...")
 
-        # if current_migration_version < 1:
-        #    logger.info("Migrating the database from v0 to v1...")
-        #
-        #    # Add new table, delete old ones, etc.
-        #
-        #    # Update the stored migration version
-        #    self._execute("UPDATE migration_version SET version = 1")
-        #
-        #    logger.info("Database migrated to v1")
+        if current_migration_version < 1:
+            logger.info("Migrating the database from v0 to v1...")
+
+            self._execute(
+                """
+                CREATE TABLE vetting (
+                    mxid VARCHAR(255) NOT NULL PRIMARY KEY UNIQUE,
+                    room_id VARCHAR(255) NOT NULL UNIQUE,
+                    vetting_create_time INT(12),
+                    voting_start_time INT(12),
+                    poll_event_id VARCHAR(255)
+                )
+                """
+            )
+
+            # Update the stored migration version
+            self._execute("UPDATE migration_version SET version = 1")
+
+            logger.info("Database migrated to v1")
 
     def _execute(self, *args) -> None:
         """A wrapper around cursor.execute that transforms placeholder ?'s to %s for postgres.
@@ -124,3 +133,6 @@ class Storage:
             self.cursor.execute(args[0].replace("?", "%s"), *args[1:])
         else:
             self.cursor.execute(*args)
+
+
+class IntegrityError(psycopg2.IntegrityError, sqlite3.IntegrityError): ...
