@@ -115,6 +115,8 @@ class Config:
         if not re.match("!.*:.*", self.vetting_space_id):
             raise ConfigError("vetting.space_id must be in the form !xxx:domain")
 
+        self.voting_time = int(self._get_cfg(["vetting", "voting_time"], required=True))
+
     def _get_cfg(
         self,
         path: List[str],

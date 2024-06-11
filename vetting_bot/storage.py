@@ -111,7 +111,8 @@ class Storage:
                     room_id VARCHAR(255) NOT NULL UNIQUE,
                     vetting_create_time INT(12),
                     voting_start_time INT(12),
-                    poll_event_id VARCHAR(255)
+                    poll_event_id VARCHAR(255),
+                    vote_ended BOOLEAN NOT NULL DEFAULT FALSE
                 )
                 """
             )

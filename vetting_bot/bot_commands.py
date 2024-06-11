@@ -15,6 +15,7 @@ from nio import (
 from vetting_bot.chat_functions import react_to_event, send_text_to_room
 from vetting_bot.config import Config
 from vetting_bot.storage import Storage
+from vetting_bot.timer import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -249,9 +250,16 @@ class Command:
             await send_text_to_room(self.client, self.room.room_id, text)
             return
 
+        voting_start_time = time.time()
+
         self.store.cursor.execute(
             "UPDATE vetting SET poll_event_id = ?, voting_start_time = ? WHERE mxid = ?",
-            (poll_resp.event_id, time.time(), vetted_user_id),
+            (poll_resp.event_id, voting_start_time, vetted_user_id),
+        )
+
+        timer = Timer(self.client, self.store, self.config)
+        await timer.wait_for_poll_end(
+            vetted_user_id, poll_resp.event_id, voting_start_time
         )
 
     async def _unknown_command(self):

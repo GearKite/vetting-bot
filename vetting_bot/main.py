@@ -19,6 +19,7 @@ from nio import (
 from vetting_bot.callbacks import Callbacks
 from vetting_bot.config import Config
 from vetting_bot.storage import Storage
+from vetting_bot.timer import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,14 @@ async def main():
             logger.info(f"Logged in as {config.user_id}")
 
             client.server = client.user_id.split(":", maxsplit=1)[1]
+
+            timer = Timer(client, store, config)
+
+            async def start_timer_with_delay():
+                await asyncio.sleep(5)
+                await timer.start_all_timers()
+
+            asyncio.create_task(start_timer_with_delay())
 
             await client.sync_forever(timeout=30000, full_state=True)
 

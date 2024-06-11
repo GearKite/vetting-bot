@@ -39,6 +39,8 @@ vetting:
   room_id: "!xxx:xxx"
   # A space which will house all the vetting rooms
   space_id: "!xxx:xxx"
+  # Voting time in seconds
+  voting_time: 172800
 
 # Logging setup
 logging:
