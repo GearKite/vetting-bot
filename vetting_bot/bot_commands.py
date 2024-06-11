@@ -9,6 +9,7 @@ from nio import (
     RoomCreateError,
     RoomMessageText,
     RoomPutStateResponse,
+    RoomSendError,
 )
 
 from vetting_bot.chat_functions import react_to_event, send_text_to_room
@@ -61,6 +62,8 @@ class Command:
             await self._show_help()
         elif self.command.startswith("start"):
             await self._start_vetting()
+        elif self.command.startswith("vote"):
+            await self._start_vote()
         else:
             await self._unknown_command()
 
@@ -180,6 +183,71 @@ class Command:
         )
         if not isinstance(space_resp, RoomPutStateResponse):
             logging.error(space_resp, exc_info=True)
+
+    async def _start_vote(self):
+        """Starts the vote"""
+        if self.room.room_id != self.config.vetting_room_id:
+            text = "This command can only be used in the main vetting room!"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+        if not self.args:
+            text = "Usage: `vote {user_id}\nExample: `vote @someone:example.com`"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+
+        vetted_user_id = self.args[0]
+
+        # Check if vetting room exists for user and poll hasn't been started yet
+        self.store.cursor.execute(
+            "SELECT room_id, poll_event_id FROM vetting WHERE mxid=?", (vetted_user_id,)
+        )
+        row = self.store.cursor.fetchone()
+        if row is None:
+            text = "This user hasn't been vetted, can't vote on them!"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+
+        poll_text = f"Accept {vetted_user_id} into the Federation?"
+        choices = ["yes", "no", "blank"]
+        choices_text = "".join(
+            [
+                f"\n{i}. {choice.title()}"
+                for choice, i in zip(choices, range(1, len(choices) + 1))
+            ]
+        )
+        answers = [
+            {"id": choice, "org.matrix.msc1767.text": choice.title()}
+            for choice in choices
+        ]
+
+        event_content = {
+            "org.matrix.msc1767.text": f"{poll_text}{choices_text}",
+            "org.matrix.msc3381.poll.start": {
+                "kind": "org.matrix.msc3381.poll.disclosed",
+                "max_selections": 1,
+                "question": {
+                    "org.matrix.msc1767.text": poll_text,
+                },
+                "answers": answers,
+            },
+        }
+
+        poll_resp = await self.client.room_send(
+            self.room.room_id,
+            message_type="org.matrix.msc3381.poll.start",
+            content=event_content,
+        )
+
+        if isinstance(poll_resp, RoomSendError):
+            logging.error(poll_resp, stack_info=True)
+            text = "Failed to send poll."
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+
+        self.store.cursor.execute(
+            "UPDATE vetting SET poll_event_id = ?, voting_start_time = ? WHERE mxid = ?",
+            (poll_resp.event_id, time.time(), vetted_user_id),
+        )
 
     async def _unknown_command(self):
         await send_text_to_room(
