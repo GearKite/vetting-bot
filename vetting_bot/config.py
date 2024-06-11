@@ -117,6 +117,13 @@ class Config:
 
         self.voting_time = int(self._get_cfg(["vetting", "voting_time"], required=True))
 
+        self.min_yes_votes = int(
+            self._get_cfg(["vetting", "min_yes_votes"], required=True)
+        )
+        self.max_no_votes = int(
+            self._get_cfg(["vetting", "max_no_votes"], required=True)
+        )
+
     def _get_cfg(
         self,
         path: List[str],

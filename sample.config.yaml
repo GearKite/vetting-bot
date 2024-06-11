@@ -41,6 +41,9 @@ vetting:
   space_id: "!xxx:xxx"
   # Voting time in seconds
   voting_time: 172800
+  # Requirements for getting accepted
+  min_yes_votes: 1
+  max_no_votes: 0
 
 # Logging setup
 logging:
