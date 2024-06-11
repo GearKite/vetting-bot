@@ -62,7 +62,7 @@ class Callbacks:
         # room.is_group does not allow room aliases
         # room.member_count > 2 ... we assume a public room
         # room.member_count <= 2 ... we assume a DM
-        if not has_command_prefix and room.member_count > 2:
+        if not has_command_prefix:
             # General message listener
             message = Message(self.client, self.store, self.config, msg, room, event)
             await message.process()
