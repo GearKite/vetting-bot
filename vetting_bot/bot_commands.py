@@ -104,6 +104,10 @@ class Command:
 
     async def _start_vetting(self):
         """Starts the vetting process"""
+        if self.room.room_id != self.config.vetting_room_id:
+            text = "This command can only be used in the main vetting room!"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
         if not self.args:
             text = "Usage: `start {user_id}\nExample: `start @someone:example.com`"
             await send_text_to_room(self.client, self.room.room_id, text)
