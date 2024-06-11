@@ -32,6 +32,14 @@ storage:
   # containing encryption keys, sync tokens, etc.
   store_path: "./store"
 
+# Vetting options
+vetting:
+  # Internal room id for the main vetting room
+  # Commands will be run here
+  room_id: "!xxx:xxx"
+  # A space which will house all the vetting rooms
+  space_id: "!xxx:xxx"
+
 # Logging setup
 logging:
   # Logging level

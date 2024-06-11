@@ -1,8 +1,20 @@
-from nio import AsyncClient, MatrixRoom, RoomMessageText
+import logging
+import random
+import re
+
+from nio import (
+    AsyncClient,
+    MatrixRoom,
+    RoomCreateError,
+    RoomMessageText,
+    RoomPutStateResponse,
+)
 
 from vetting_bot.chat_functions import react_to_event, send_text_to_room
 from vetting_bot.config import Config
 from vetting_bot.storage import Storage
+
+logger = logging.getLogger(__name__)
 
 
 class Command:
@@ -46,6 +58,8 @@ class Command:
             await self._react()
         elif self.command.startswith("help"):
             await self._show_help()
+        elif self.command.startswith("start"):
+            await self._start_vetting()
         else:
             await self._unknown_command()
 
@@ -87,9 +101,83 @@ class Command:
             text = "Unknown help topic!"
         await send_text_to_room(self.client, self.room.room_id, text)
 
+    async def _start_vetting(self):
+        """Starts the vetting process"""
+        if not self.args:
+            text = "Usage: `start {user_id}\nExample: `start @someone:example.com`"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+
+        vetted_user_id = self.args[0]
+
+        if not validate_user_id(vetted_user_id):
+            text = (
+                "The entered user id is invalid. "
+                f"It should be in the format of `{self.client.user_id}`"
+            )
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+
+        # Get members to invite
+        invitees = [member_id for member_id in self.room.users.keys()]
+        invitees.append(vetted_user_id)
+        invitees.remove(self.client.user_id)
+
+        # Create new room
+        random_string = hex(random.randrange(4096, 65535))[2:].upper()
+        initial_state = [
+            {  # Enable encryption
+                "type": "m.room.encryption",
+                "content": {"algorithm": "m.megolm.v1.aes-sha2"},
+                "state_key": "",
+            }
+        ]
+        room_resp = await self.client.room_create(
+            name=f"Vetting {random_string}",
+            invite=invitees,
+            initial_state=initial_state,
+        )
+
+        if isinstance(room_resp, RoomCreateError):
+            text = "Unable to create room."
+            await send_text_to_room(self.client, self.room.room_id, text)
+            logging.error(room_resp, stack_info=True)
+            return
+
+        self.store.conn
+
+        # Add newly created room to space
+        space_child_content = {
+            "suggested": False,
+            "via": [
+                self.client.user_id.split(":", maxsplit=1)[1]
+            ],  # the bot's homeserver
+        }
+        space_resp = await self.client.room_put_state(
+            room_id=self.config.vetting_space_id,
+            event_type="m.space.child",
+            content=space_child_content,
+            state_key=room_resp.room_id,
+        )
+        if not isinstance(space_resp, RoomPutStateResponse):
+            logging.error(space_resp, exc_info=True)
+
     async def _unknown_command(self):
         await send_text_to_room(
             self.client,
             self.room.room_id,
             f"Unknown command '{self.command}'. Try the 'help' command for more information.",
         )
+
+
+def validate_user_id(user_id):
+    return (
+        re.match(
+            (
+                r"^@[!-9;-~]*:"
+                r"((\d{1,3}\.){3}\d{1,3}|\[[0-9A-Fa-f:.]{2,45}\]|[0-9A-Za-z.-]{1,255})(:\d{1,5})?$"
+            ),
+            user_id,
+        )
+        is not None
+    )

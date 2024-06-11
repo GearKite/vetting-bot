@@ -4,8 +4,8 @@ import re
 import sys
 from typing import Any, List, Optional
 
-import yaml
 import coloredlogs
+import yaml
 
 from vetting_bot.errors import ConfigError
 
@@ -105,6 +105,15 @@ class Config:
         self.homeserver_url = self._get_cfg(["matrix", "homeserver_url"], required=True)
 
         self.command_prefix = self._get_cfg(["command_prefix"], default="!c") + " "
+
+        # Vetting setup
+        self.vetting_room_id = self._get_cfg(["vetting", "room_id"], required=True)
+        if not re.match("!.*:.*", self.vetting_room_id):
+            raise ConfigError("vetting.room_id must be in the form !xxx:domain")
+
+        self.vetting_space_id = self._get_cfg(["vetting", "space_id"], required=True)
+        if not re.match("!.*:.*", self.vetting_space_id):
+            raise ConfigError("vetting.space_id must be in the form !xxx:domain")
 
     def _get_cfg(
         self,
