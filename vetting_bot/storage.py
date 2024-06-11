@@ -133,6 +133,3 @@ class Storage:
             self.cursor.execute(args[0].replace("?", "%s"), *args[1:])
         else:
             self.cursor.execute(*args)
-
-
-class IntegrityError(psycopg2.IntegrityError, sqlite3.IntegrityError): ...

@@ -13,7 +13,7 @@ from nio import (
 
 from vetting_bot.chat_functions import react_to_event, send_text_to_room
 from vetting_bot.config import Config
-from vetting_bot.storage import Storage, IntegrityError
+from vetting_bot.storage import Storage
 
 logger = logging.getLogger(__name__)
 
