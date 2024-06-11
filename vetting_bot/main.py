@@ -105,6 +105,9 @@ async def main():
                 # Login succeeded!
 
             logger.info(f"Logged in as {config.user_id}")
+
+            client.server = client.user_id.split(":", maxsplit=1)[1]
+
             await client.sync_forever(timeout=30000, full_state=True)
 
         except (ClientConnectionError, ServerDisconnectedError):

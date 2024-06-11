@@ -171,9 +171,7 @@ class Command:
         # Add newly created room to space
         space_child_content = {
             "suggested": False,
-            "via": [
-                self.client.user_id.split(":", maxsplit=1)[1]
-            ],  # the bot's homeserver
+            "via": [self.client.server],
         }
         space_resp = await self.client.room_put_state(
             room_id=self.config.vetting_space_id,
@@ -204,6 +202,13 @@ class Command:
         row = self.store.cursor.fetchone()
         if row is None:
             text = "This user hasn't been vetted, can't vote on them!"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
+        if row[1] is not None:
+            event_link = f"https://matrix.to/#/{self.config.vetting_room_id}/{row[1]}?via={self.client.server}"
+            text = (
+                f"A poll has already been started for this user [here]({event_link})."
+            )
             await send_text_to_room(self.client, self.room.room_id, text)
             return
 
