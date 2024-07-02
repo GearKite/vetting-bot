@@ -22,7 +22,7 @@
 # We use an initial docker container to build all of the runtime dependencies,
 # then transfer those dependencies to the container we're going to ship,
 # before throwing this one away
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.11
 FROM docker.io/python:${PYTHON_VERSION}-alpine as builder
 
 ##
@@ -63,7 +63,7 @@ COPY vetting_bot/__init__.py /src/vetting_bot/
 COPY README.md vetting-bot /src/
 
 # Build the dependencies
-COPY setup.py /src/setup.py
+COPY pyproject.toml /src/pyproject.toml
 RUN pip install --prefix="/python-libs" --no-warn-script-location "/src/.[postgres]"
 
 # Now copy the source code

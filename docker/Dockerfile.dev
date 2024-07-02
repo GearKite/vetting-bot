@@ -21,7 +21,7 @@
 #    docker build -f docker/Dockerfile --build-arg LIBOLM_VERSION=3.2.10 .
 #
 
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.11
 FROM docker.io/python:${PYTHON_VERSION}-alpine
 
 ##
@@ -56,7 +56,7 @@ RUN apk add --no-cache \
 RUN mkdir -p /src/vetting_bot
 COPY vetting_bot/__init__.py /src/vetting_bot/
 COPY README.md vetting-bot /src/
-COPY setup.py /src/setup.py
+COPY pyproject.toml /src/pyproject.toml
 RUN pip install -e "/src/.[postgres]"
 
 # Now copy the source code
