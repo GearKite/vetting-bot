@@ -5,7 +5,9 @@ description = ""
 authors = ["AF2C <af2c@protonmail.com>"]
 license = "AGPL-3.0-or-later"
 readme = "README.md"
-package-mode = true
+
+[tool.poetry.scripts]
+vetting-bot = "vetting_bot:main"
 
 [tool.poetry.dependencies]
 python = "^3.11"
