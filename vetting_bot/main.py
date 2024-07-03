@@ -131,5 +131,6 @@ async def main():
             await client.close()
 
 
-# Run the main function in an asyncio event loop
-asyncio.get_event_loop().run_until_complete(main())
+def run():
+    # Run the main function in an asyncio event loop
+    asyncio.get_event_loop().run_until_complete(main())
