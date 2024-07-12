@@ -212,7 +212,7 @@ class Callbacks:
                     return
 
                 # Invite the user
-                logger.info("Inviting new user (%s) to the Federation.", row[0])
+                logger.info("Inviting new user (%s) to the main space.", row[0])
                 await self.client.room_invite(self.config.main_space_id, row[0])
 
     async def unknown(self, room: MatrixRoom, event: UnknownEvent) -> None:

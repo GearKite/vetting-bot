@@ -91,7 +91,7 @@ class Command:
         """Show the help text"""
         if not self.args:
             text = (
-                "Hello, I am a bot made with matrix-nio! Use `help commands` to view "
+                "Hello, I am the vetting bot! Use `help commands` to view "
                 "available commands."
             )
             await send_text_to_room(self.client, self.room.room_id, text)
@@ -101,7 +101,7 @@ class Command:
         if topic == "rules":
             text = "These are the rules!"
         elif topic == "commands":
-            text = "Available commands: ..."
+            text = "Available commands: \n" "`start {user_id}`\n" "`vote {user_id}`\n"
         else:
             text = "Unknown help topic!"
         await send_text_to_room(self.client, self.room.room_id, text)
@@ -109,7 +109,7 @@ class Command:
     async def _start_vetting(self):
         """Starts the vetting process"""
         if self.room.room_id != self.config.vetting_room_id:
-            text = "This command can only be used in the main vetting room!"
+            text = f"This command can only be used in https://matrix.to/#/{self.config.vetting_room_id} !"
             await send_text_to_room(self.client, self.room.room_id, text)
             return
         if not self.args:
@@ -133,7 +133,7 @@ class Command:
         )
         row = self.store.cursor.fetchone()
         if row is not None:
-            text = f"A vetting room already exists for this user: `{row[0]}`"
+            text = f"A vetting room already exists for this user: https://matrix.to/#/{row[0]}"
             await send_text_to_room(self.client, self.room.room_id, text)
             return
 
@@ -158,7 +158,7 @@ class Command:
         )
 
         if isinstance(room_resp, RoomCreateError):
-            text = "Unable to create room."
+            text = f"Unable to create room: {room_resp}"
             await send_text_to_room(self.client, self.room.room_id, text)
             logging.error(room_resp, stack_info=True)
             return
@@ -186,7 +186,7 @@ class Command:
     async def _start_vote(self):
         """Starts the vote"""
         if self.room.room_id != self.config.vetting_room_id:
-            text = "This command can only be used in the main vetting room!"
+            text = f"This command can only be used in https://matrix.to/#/{self.config.vetting_room_id} !"
             await send_text_to_room(self.client, self.room.room_id, text)
             return
         if not self.args:
@@ -208,7 +208,7 @@ class Command:
         if row[1] is not None:
             event_link = f"https://matrix.to/#/{self.config.vetting_room_id}/{row[1]}?via={self.client.server}"
             text = (
-                f"A poll has already been started for this user [here]({event_link})."
+                f"A poll has already been started for this user: {event_link}"
             )
             await send_text_to_room(self.client, self.room.room_id, text)
             return
