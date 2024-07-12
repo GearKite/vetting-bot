@@ -46,6 +46,8 @@ vetting:
   # Requirements for getting accepted
   min_yes_votes: 1
   max_no_votes: 0
+  # Minimum power level to automatically invite users from vetting room
+  power_level_invite: 10
 
 # Logging setup
 logging:

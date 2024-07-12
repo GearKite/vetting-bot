@@ -133,6 +133,10 @@ class Config:
         self.max_no_votes = int(
             self._get_cfg(["vetting", "max_no_votes"], required=True)
         )
+        
+        self.power_level_invite = int(
+            self._get_cfg(["vetting", "power_level_invite"], required=True)
+        )
 
     def _get_cfg(
         self,

@@ -138,7 +138,11 @@ class Command:
             return
 
         # Get members to invite
-        invitees = [member_id for member_id in self.room.users.keys()]
+        invitees = [
+            user.user_id
+            for user in self.room.users.values()
+            if user.power_level >= self.config.power_level_invite
+        ]
         invitees.append(vetted_user_id)
         invitees.remove(self.client.user_id)
 
@@ -198,7 +202,7 @@ class Command:
 
         # Check if vetting room exists for user and poll hasn't been started yet
         self.store.cursor.execute(
-            "SELECT room_id, poll_event_id FROM vetting WHERE mxid=?", (vetted_user_id,)
+            "SELECT room_id, poll_event_id, room_id FROM vetting WHERE mxid=?", (vetted_user_id,)
         )
         row = self.store.cursor.fetchone()
         if row is None:
@@ -207,11 +211,11 @@ class Command:
             return
         if row[1] is not None:
             event_link = f"https://matrix.to/#/{self.config.vetting_room_id}/{row[1]}?via={self.client.server}"
-            text = (
-                f"A poll has already been started for this user: {event_link}"
-            )
+            text = f"A poll has already been started for this user: {event_link}"
             await send_text_to_room(self.client, self.room.room_id, text)
             return
+        
+        vetting_room_id = row[2]
 
         poll_text = f"Accept {vetted_user_id} into the Federation?"
         choices = ["yes", "no", "blank"]
@@ -246,7 +250,7 @@ class Command:
 
         if isinstance(poll_resp, RoomSendError):
             logging.error(poll_resp, stack_info=True)
-            text = "Failed to send poll."
+            text = f"Failed to send poll: {poll_resp}"
             await send_text_to_room(self.client, self.room.room_id, text)
             return
 
@@ -261,6 +265,28 @@ class Command:
         await timer.wait_for_poll_end(
             vetted_user_id, poll_resp.event_id, voting_start_time
         )
+
+        # Send link to vetting room
+        vetted_user_server = vetted_user_id.split(":", maxsplit=1)[1]
+        vetting_room_link = f"https://matrix.to/#/{vetting_room_id}?via={self.client.server}?via={vetted_user_server}"
+        
+        msg_content = {
+            "m.relates_to": {"rel_type": "m.thread", "event_id": poll_resp.event_id},
+            "msgtype": "m.text",
+            "body": f"Vetting room: {vetting_room_link}",
+        }
+
+        msg_resp = await self.client.room_send(
+            self.room.room_id,
+            message_type="m.room.message",
+            content=msg_content,
+        )
+        
+        if isinstance(msg_resp, RoomSendError):
+            logging.error(msg_resp, stack_info=True)
+            text = f"Failed to send vetting room link: {msg_resp}"
+            await send_text_to_room(self.client, self.room.room_id, text)
+            return
 
     async def _unknown_command(self):
         await send_text_to_room(
