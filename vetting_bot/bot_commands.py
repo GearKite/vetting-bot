@@ -52,6 +52,8 @@ class Command:
         self.room = room
         self.event = event
         self.args = self.command.split()[1:]
+        
+        logger.info("Running command `%s` because of %s", command, event.sender)
 
     async def process(self):
         """Process the command"""
@@ -133,27 +135,56 @@ class Command:
         )
         row = self.store.cursor.fetchone()
         if row is not None:
+            logger.warn("Vetting room already exists for %s", vetted_user_id)
             text = f"A vetting room already exists for this user: https://matrix.to/#/{row[0]}"
             await send_text_to_room(self.client, self.room.room_id, text)
             return
+        
+        logger.info("Creating vetting room for %s", vetted_user_id)
 
         # Get members to invite
-        invitees = [
+        invitees = set([
             user.user_id
             for user in self.room.users.values()
             if user.power_level >= self.config.power_level_invite
-        ]
-        invitees.append(vetted_user_id)
+        ])
+        invitees.add(vetted_user_id) # Invite user to vet
+        invitees.add(self.event.sender) # Invite user that sent the command
         invitees.remove(self.client.user_id)
 
         # Create new room
         random_string = hex(random.randrange(4096, 65535))[2:].upper()
         initial_state = [
-            {  # Enable encryption
+            # Enable encryption
+            {
                 "type": "m.room.encryption",
                 "content": {"algorithm": "m.megolm.v1.aes-sha2"},
                 "state_key": "",
-            }
+            },
+            # Make room joinable by federation members
+            {
+                "type": "m.room.join_rules",
+                "state_key": "",
+                "content": {
+                    "join_rule": "restricted",
+                    "allow": [
+                        {
+                            "room_id": self.config.main_space_id,
+                            "type": "m.room_membership",
+                        },
+                        {
+                            "room_id": self.config.vetting_space_id,
+                            "type": "m.room_membership",
+                        },
+                    ],
+                },
+            },
+            # Show message history to new members
+            {
+                "type": "m.room.history_visibility",
+                "state_key": "",
+                "content": {"history_visibility": "shared"},
+            },
         ]
         room_resp = await self.client.room_create(
             name=f"Vetting {random_string}",
@@ -164,7 +195,7 @@ class Command:
         if isinstance(room_resp, RoomCreateError):
             text = f"Unable to create room: {room_resp}"
             await send_text_to_room(self.client, self.room.room_id, text)
-            logging.error(room_resp, stack_info=True)
+            logging.error(text, stack_info=True)
             return
 
         # Create new vetting entry
@@ -172,6 +203,8 @@ class Command:
             "INSERT INTO vetting (mxid, room_id, vetting_create_time) VALUES (?, ?, ?)",
             (vetted_user_id, room_resp.room_id, time.time()),
         )
+        
+        logger.debug("Adding vetting room to space")
 
         # Add newly created room to space
         space_child_content = {
@@ -185,7 +218,15 @@ class Command:
             state_key=room_resp.room_id,
         )
         if not isinstance(space_resp, RoomPutStateResponse):
-            logging.error(space_resp, exc_info=True)
+            logging.error("Failed to add room to space: %s", space_resp, exc_info=True)
+
+        vetted_user_server = vetted_user_id.split(":", maxsplit=1)[1]
+        vetting_room_link = f"https://matrix.to/#/{room_resp.room_id}?via={self.client.server}&via={vetted_user_server}"
+
+        text = f"Created vetting room for https://matrix.to/#/{vetted_user_id}: {vetting_room_link}"
+        await send_text_to_room(self.client, self.room.room_id, text)
+        
+        logger.info("Vetting room set up for %s", vetted_user_id)
 
     async def _start_vote(self):
         """Starts the vote"""
@@ -202,7 +243,8 @@ class Command:
 
         # Check if vetting room exists for user and poll hasn't been started yet
         self.store.cursor.execute(
-            "SELECT room_id, poll_event_id, room_id FROM vetting WHERE mxid=?", (vetted_user_id,)
+            "SELECT room_id, poll_event_id, room_id FROM vetting WHERE mxid=?",
+            (vetted_user_id,),
         )
         row = self.store.cursor.fetchone()
         if row is None:
@@ -214,7 +256,7 @@ class Command:
             text = f"A poll has already been started for this user: {event_link}"
             await send_text_to_room(self.client, self.room.room_id, text)
             return
-        
+
         vetting_room_id = row[2]
 
         poll_text = f"Accept {vetted_user_id} into the Federation?"
@@ -268,8 +310,8 @@ class Command:
 
         # Send link to vetting room
         vetted_user_server = vetted_user_id.split(":", maxsplit=1)[1]
-        vetting_room_link = f"https://matrix.to/#/{vetting_room_id}?via={self.client.server}?via={vetted_user_server}"
-        
+        vetting_room_link = f"https://matrix.to/#/{vetting_room_id}?via={self.client.server}&via={vetted_user_server}"
+
         msg_content = {
             "m.relates_to": {"rel_type": "m.thread", "event_id": poll_resp.event_id},
             "msgtype": "m.text",
@@ -281,7 +323,7 @@ class Command:
             message_type="m.room.message",
             content=msg_content,
         )
-        
+
         if isinstance(msg_resp, RoomSendError):
             logging.error(msg_resp, stack_info=True)
             text = f"Failed to send vetting room link: {msg_resp}"
